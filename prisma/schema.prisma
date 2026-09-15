@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -117,7 +118,7 @@ model AuditLog {
   adminId   String?
   admin     Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
   action    String
-  metadata  String   @default("{}")
+  metadata  Json     @default("{}")
   createdAt DateTime @default(now())
 
   @@index([createdAt])
