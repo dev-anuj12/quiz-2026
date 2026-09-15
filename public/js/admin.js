@@ -382,50 +382,186 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Action Button Listeners
-  addClick('btn-game-start', () => apiCall('/api/game/start'));
-  addClick('btn-game-pause', () => apiCall('/api/game/pause'));
-  addClick('btn-game-resume', () => apiCall('/api/game/resume'));
-  addClick('btn-game-end', () => {
-    if (confirm('End the quiz and trigger final rankings?')) return apiCall('/api/game/end');
+  addClick('btn-game-start', () => {
+    if (currentState) {
+      currentState.status = 'ACTIVE';
+      renderState(currentState);
+    }
+    return apiCall('/api/game/start');
   });
+
+  addClick('btn-game-pause', () => {
+    if (currentState) {
+      currentState.status = 'PAUSED';
+      renderState(currentState);
+    }
+    return apiCall('/api/game/pause');
+  });
+
+  addClick('btn-game-resume', () => {
+    if (currentState) {
+      currentState.status = 'ACTIVE';
+      renderState(currentState);
+    }
+    return apiCall('/api/game/resume');
+  });
+
+  addClick('btn-game-end', () => {
+    if (confirm('End the quiz and trigger final rankings?')) {
+      if (currentState) {
+        currentState.status = 'ENDED';
+        currentState.answersLocked = true;
+        renderState(currentState);
+      }
+      return apiCall('/api/game/end');
+    }
+  });
+
   addClick('btn-game-reset', () => {
-    if (confirm('Reset the arena back to initial lobby status?')) return apiCall('/api/game/reset');
+    if (confirm('Reset the arena back to initial lobby status?')) {
+      if (currentState) {
+        currentState.status = 'LOBBY';
+        currentState.currentRound = 1;
+        currentState.questionVisible = false;
+        currentState.answersLocked = false;
+        currentState.answerRevealed = false;
+        renderState(currentState);
+      }
+      return apiCall('/api/game/reset');
+    }
   });
 
   // Round Selectors
-  addClick('btn-round-1', () => apiCall('/api/game/round', 'POST', { roundNumber: 1 }));
-  addClick('btn-round-2', () => apiCall('/api/game/round', 'POST', { roundNumber: 2 }));
-  addClick('btn-round-3', () => apiCall('/api/game/round', 'POST', { roundNumber: 3 }));
+  function selectRoundOptimistic(rNum) {
+    if (currentState) {
+      currentState.currentRound = rNum;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/round', 'POST', { roundNumber: rNum });
+  }
+  addClick('btn-round-1', () => selectRoundOptimistic(1));
+  addClick('btn-round-2', () => selectRoundOptimistic(2));
+  addClick('btn-round-3', () => selectRoundOptimistic(3));
 
   // Question Navigation & Controls
   async function navigateQuestion(direction) {
-    // Navigation publishes the new question and begins a fresh 30-second
-    // server-authoritative timer in the same request.
+    if (currentState && currentRoundQuestions.length > 0) {
+      const idx = currentRoundQuestions.findIndex(q => q.id === currentState.currentQuestionId);
+      let targetIdx = direction === 'next'
+        ? (idx === -1 ? 0 : Math.min(idx + 1, currentRoundQuestions.length - 1))
+        : (idx === -1 ? 0 : Math.max(idx - 1, 0));
+      const targetQ = currentRoundQuestions[targetIdx];
+      if (targetQ) {
+        currentState.currentQuestionId = targetQ.id;
+        currentState.currentQuestion = targetQ;
+        currentState.questionVisible = true;
+        currentState.answerRevealed = false;
+        currentState.answersLocked = false;
+        currentState.timerStartedAt = null;
+        currentState.timerDuration = 30;
+        currentState.timerPaused = false;
+        currentState.leaderboardVisible = false;
+        renderState(currentState);
+      }
+    }
     await apiCall('/api/game/question-nav', 'POST', { direction });
   }
+
   addClick('btn-prev-question', () => navigateQuestion('prev'));
   addClick('btn-next-question', () => navigateQuestion('next'));
+
   addClick('btn-toggle-q-visibility', () => {
+    if (currentState) {
+      currentState.questionVisible = !currentState.questionVisible;
+      renderState(currentState);
+    }
     const isVisible = currentState?.questionVisible;
-    return apiCall('/api/game/question-visibility', 'POST', { visible: !isVisible });
+    return apiCall('/api/game/question-visibility', 'POST', { visible: isVisible });
   });
 
   // Timer Controls
-  addClick('btn-timer-start', () => apiCall('/api/game/timer', 'POST', { action: 'start', duration: 30 }));
-  addClick('btn-timer-pause', () => apiCall('/api/game/timer', 'POST', { action: 'pause' }));
-  addClick('btn-timer-reset', () => apiCall('/api/game/timer', 'POST', { action: 'reset', duration: 30 }));
+  addClick('btn-timer-start', () => {
+    if (currentState) {
+      currentState.status = 'ACTIVE';
+      currentState.timerStartedAt = new Date().toISOString();
+      currentState.timerDuration = 30;
+      currentState.timerPaused = false;
+      currentState.answersLocked = false;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/timer', 'POST', { action: 'start', duration: 30 });
+  });
+
+  addClick('btn-timer-pause', () => {
+    if (currentState) {
+      currentState.timerPaused = true;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/timer', 'POST', { action: 'pause' });
+  });
+
+  addClick('btn-timer-reset', () => {
+    if (currentState) {
+      currentState.timerStartedAt = null;
+      currentState.timerDuration = 30;
+      currentState.timerPaused = false;
+      currentState.answersLocked = false;
+      currentState.answerRevealed = false;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/timer', 'POST', { action: 'reset', duration: 30 });
+  });
 
   // Answer Controls
-  addClick('btn-lock-answers', () => apiCall('/api/game/answer-lock', 'POST', { locked: true }));
-  addClick('btn-unlock-answers', () => apiCall('/api/game/answer-lock', 'POST', { locked: false }));
-  addClick('btn-reveal-answer', () => apiCall('/api/game/reveal', 'POST', { reveal: true }));
+  addClick('btn-lock-answers', () => {
+    if (currentState) {
+      currentState.answersLocked = true;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/answer-lock', 'POST', { locked: true });
+  });
+
+  addClick('btn-unlock-answers', () => {
+    if (currentState) {
+      currentState.answersLocked = false;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/answer-lock', 'POST', { locked: false });
+  });
+
+  addClick('btn-reveal-answer', () => {
+    if (currentState) {
+      currentState.answerRevealed = true;
+      currentState.answersLocked = true;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/reveal', 'POST', { reveal: true });
+  });
 
   // Leaderboard & Projector Controls
-  addClick('btn-leaderboard-show', () => apiCall('/api/game/leaderboard', 'POST', { visible: true }));
-  addClick('btn-leaderboard-hide', () => apiCall('/api/game/leaderboard', 'POST', { visible: false }));
+  addClick('btn-leaderboard-show', () => {
+    if (currentState) {
+      currentState.leaderboardVisible = true;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/leaderboard', 'POST', { visible: true });
+  });
+
+  addClick('btn-leaderboard-hide', () => {
+    if (currentState) {
+      currentState.leaderboardVisible = false;
+      renderState(currentState);
+    }
+    return apiCall('/api/game/leaderboard', 'POST', { visible: false });
+  });
+
   addClick('btn-projector-toggle', () => {
+    if (currentState) {
+      currentState.projectorEnabled = !currentState.projectorEnabled;
+      renderState(currentState);
+    }
     const isEnabled = currentState?.projectorEnabled;
-    return apiCall('/api/game/projector', 'POST', { enabled: !isEnabled });
+    return apiCall('/api/game/projector', 'POST', { enabled: isEnabled });
   });
 
   // Registration Open/Close

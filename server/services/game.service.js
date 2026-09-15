@@ -1,7 +1,30 @@
 const prisma = require('../config/db');
 const logger = require('../utils/logger');
 
+const questionCache = new Map();
+
 class GameService {
+  async getQuestionCached(questionId) {
+    if (!questionId) return null;
+    if (questionCache.has(questionId)) {
+      return questionCache.get(questionId);
+    }
+    const q = await prisma.question.findUnique({
+      where: { id: questionId },
+      include: { round: true }
+    });
+    if (q) questionCache.set(questionId, q);
+    return q;
+  }
+
+  invalidateQuestionCache(questionId = null) {
+    if (questionId) {
+      questionCache.delete(questionId);
+    } else {
+      questionCache.clear();
+    }
+  }
+
   async getOrCreateState() {
     let state = await prisma.gameState.findUnique({
       where: { id: 'global_game_state' }
@@ -49,16 +72,11 @@ class GameService {
   }
 
   async getHydratedState(state = null) {
-    // Mutation handlers already have the freshly updated row. Reusing it avoids
-    // an extra database read on every host button press.
     state = state || await this.getOrCreateState();
     let currentQuestion = null;
 
     if (state.currentQuestionId) {
-      currentQuestion = await prisma.question.findUnique({
-        where: { id: state.currentQuestionId },
-        include: { round: true }
-      });
+      currentQuestion = await this.getQuestionCached(state.currentQuestionId);
     }
 
     const remainingTime = this.calculateRemainingTime(state);
@@ -153,14 +171,13 @@ class GameService {
       data: updates
     });
 
-    // The UI state and audit entry do not depend on each other, so do both
-    // after the update instead of making the host wait for serial queries.
-    const [hydratedState] = await Promise.all([
-      this.getHydratedState(state),
-      actionName ? this.recordAuditLog(adminId, actionName, updates) : Promise.resolve()
-    ]);
+    if (actionName) {
+      this.recordAuditLog(adminId, actionName, updates).catch(err => {
+        logger.warn('Audit log write error:', err.message);
+      });
+    }
 
-    return hydratedState;
+    return await this.getHydratedState(state);
   }
 
   async startGame(adminId) {
