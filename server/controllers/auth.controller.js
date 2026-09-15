@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const prisma = require('../config/db');
@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
     logger.error('Login error:', error.message);
     return res.status(500).json({
       success: false,
-      error: 'An internal error occurred during authentication'
+      error: error.message || 'An internal error occurred during authentication'
     });
   }
 };
