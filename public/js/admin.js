@@ -145,10 +145,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     adminQuestionSelect.addEventListener('change', async (e) => {
       const qId = e.target.value;
       if (qId) {
-        // Activating a question hides the leaderboard server-side and starts
-        // its timer, so this remains one responsive request.
+        if (currentState) {
+          const targetQ = currentRoundQuestions.find(q => q.id === qId);
+          currentState.currentQuestionId = qId;
+          if (targetQ) currentState.currentQuestion = targetQ;
+          currentState.questionVisible = true;
+          currentState.answerRevealed = false;
+          currentState.answersLocked = false;
+          currentState.timerStartedAt = new Date().toISOString();
+          currentState.timerDuration = 30;
+          currentState.timerPaused = false;
+          currentState.status = 'ACTIVE';
+          currentState.leaderboardVisible = false;
+          renderState(currentState);
+        }
         await apiCall('/api/game/question', 'POST', { questionId: qId, show: true });
-        window.AppConfig.showToast('Question activated and visible to arena', 'success');
+        window.AppConfig.showToast('Question activated and 30s timer started', 'success');
       }
     });
   }
@@ -474,9 +486,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentState.questionVisible = true;
         currentState.answerRevealed = false;
         currentState.answersLocked = false;
-        currentState.timerStartedAt = null;
+        currentState.timerStartedAt = new Date().toISOString();
         currentState.timerDuration = 30;
         currentState.timerPaused = false;
+        currentState.status = 'ACTIVE';
         currentState.leaderboardVisible = false;
         renderState(currentState);
       }

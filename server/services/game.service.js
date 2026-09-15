@@ -288,29 +288,40 @@ class GameService {
     });
     if (!question) throw new Error('Question not found');
 
+    const isVisible = Boolean(show);
     const updates = {
       currentRound: question.round.number,
       currentQuestionId: question.id,
       leaderboardVisible: false,
-      questionVisible: Boolean(show),
+      questionVisible: isVisible,
       answersLocked: false,
       answerRevealed: false,
-      timerStartedAt: null,
+      timerStartedAt: isVisible ? new Date() : null,
       timerDuration: 30,
-      timerPaused: false
+      timerPaused: false,
+      status: isVisible ? 'ACTIVE' : 'LOBBY'
     };
 
     return await this.updateState(updates, adminId, `QUESTION_SET_${question.id}`);
   }
 
   async setQuestionVisibility(visible, adminId) {
+    const isVisible = Boolean(visible);
     const updates = {
-      questionVisible: Boolean(visible)
+      questionVisible: isVisible,
+      status: isVisible ? 'ACTIVE' : 'PAUSED'
     };
+    if (isVisible) {
+      updates.timerStartedAt = new Date();
+      updates.timerDuration = 30;
+      updates.timerPaused = false;
+      updates.answersLocked = false;
+      updates.answerRevealed = false;
+    }
     return await this.updateState(
       updates,
       adminId,
-      visible ? 'QUESTION_SHOWN' : 'QUESTION_HIDDEN'
+      isVisible ? 'QUESTION_SHOWN' : 'QUESTION_HIDDEN'
     );
   }
 
