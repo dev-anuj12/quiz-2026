@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+
+  @@map("admins")
+}
+
+model Round {
+  id        String     @id @default(uuid())
+  number    Int        @unique
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  questions Question[]
+
+  @@map("rounds")
+}
+
+model Team {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  leaderName   String
+  avatar       String
+  sessionToken String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  answers      Answer[]
+  scores       Score[]
+
+  @@map("teams")
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  roundId       String
+  round         Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  text          String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctOption String
+  mediaUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  answers       Answer[]
+  scores        Score[]
+
+  @@index([roundId])
+  @@map("questions")
+}
+
+model Answer {
+  id             String   @id @default(uuid())
+  teamId         String
+  team           Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption String
+  isCorrect      Boolean
+  responseTime   Float
+  submittedAt    DateTime @default(now())
+
+  @@unique([teamId, questionId])
+  @@index([questionId])
+  @@map("answers")
+}
+
+model Score {
+  id           String   @id @default(uuid())
+  teamId       String
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  points       Int
+  responseTime Float
+  createdAt    DateTime @default(now())
+
+  @@unique([teamId, questionId])
+  @@index([teamId])
+  @@map("scores")
+}
+
+model GameState {
+  id                 String    @id @default("global_game_state")
+  currentRound       Int       @default(1)
+  currentQuestionId  String?
+  status             String    @default("LOBBY") // LOBBY, ACTIVE, PAUSED, ENDED
+  timerStartedAt     DateTime?
+  timerDuration      Int       @default(30)
+  timerPaused        Boolean   @default(false)
+  questionVisible    Boolean   @default(false)
+  answersLocked      Boolean   @default(false)
+  answerRevealed     Boolean   @default(false)
+  leaderboardVisible Boolean   @default(false)
+  projectorEnabled   Boolean   @default(false)
+  updatedAt          DateTime  @updatedAt
+
+  @@map("game_state")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  adminId   String?
+  admin     Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  action    String
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}

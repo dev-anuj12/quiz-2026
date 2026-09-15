@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KDK INDUCTION QUIZ 2026 | Rotaract Club of KDKCE</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- QR Code Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Socket.IO Client CDN -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative selection:bg-cyan selection:text-black">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header Branding -->
+  <header class="w-full border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <!-- Primary Rotaract Logo & Secondary KDK Logo -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <a href="/" class="flex items-center" aria-label="Rotaract Club of KDKCE">
+          <div class="bg-white/95 px-2 py-1 rounded-lg flex items-center shadow-md">
+            <img src="/assets/rotaract-logo.png" alt="Rotaract Club of KDKCE Logo" class="h-9 sm:h-11 w-auto object-contain" />
+          </div>
+        </a>
+        <div class="h-8 w-px bg-white/20 hidden sm:block"></div>
+        <a href="/" class="hidden sm:flex items-center" aria-label="KDK College of Engineering">
+          <div class="bg-white/95 px-2 py-1 rounded-lg flex items-center shadow-md">
+            <img src="/assets/kdk-logo.png" alt="KDK College of Engineering Logo" class="h-9 sm:h-11 w-auto object-contain" />
+          </div>
+        </a>
+      </div>
+
+      <!-- Navigation & Status -->
+      <div class="flex items-center gap-4">
+        <div id="connection-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-950/60 text-emerald-400 border-emerald-800/80">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connection-status-text">Connected</span>
+        </div>
+        <a href="/admin-login.html" class="text-xs font-semibold tracking-wider text-slate-400 hover:text-cyan transition-colors uppercase py-1 px-2.5 rounded border border-white/10 hover:border-cyan/40">
+          Admin Login
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Hero & Dynamic QR Arena Entry -->
+  <main class="flex-1 flex items-center justify-center p-6 relative z-10">
+    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+      
+      <!-- Left Column: Title & Info -->
+      <div class="md:col-span-7 text-center md:text-left space-y-5">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-magenta/10 border border-magenta/30 text-magenta text-xs font-bold uppercase tracking-wider">
+          <span>★</span> Presented by Rotaract Club of KDKCE
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black font-heading tracking-tight leading-none text-white">
+          KDK INDUCTION <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-emerald to-amber">QUIZ 2026</span>
+        </h1>
+
+        <p class="text-slate-300 text-base sm:text-lg max-w-lg font-normal">
+          The official collegiate arena for incoming engineering minds. Fast-paced, server-authoritative, and live on stage.
+        </p>
+
+        <!-- Dynamic Status Message -->
+        <div id="arena-status-banner" class="p-4 rounded-lg bg-surface/90 border border-white/10 max-w-md">
+          <div class="flex items-center gap-3">
+            <span id="status-indicator-dot" class="w-3 h-3 rounded-full bg-amber animate-pulse"></span>
+            <span id="arena-status-text" class="text-sm font-medium text-slate-200">
+              Checking arena status...
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+          <a id="join-arena-btn" href="/register.html" class="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
+            <span>Enter The Arena</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
+          <a href="/projector.html" target="_blank" class="btn-outline text-sm py-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span>Projector View</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Dynamic QR Arena Card -->
+      <div class="md:col-span-5 flex justify-center">
+        <div class="cyber-card p-6 bg-card/90 border border-cyan/30 text-center max-w-sm w-full relative group">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-cyan text-arena font-heading font-extrabold text-[11px] tracking-widest uppercase shadow-md">
+            Direct Mobile Access
+          </div>
+
+          <p class="text-xs font-bold uppercase tracking-widest text-cyan mt-3 mb-4 font-heading">
+            SCAN TO JOIN THE ARENA
+          </p>
+
+          <!-- Dynamic QR Container -->
+          <div class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner">
+            <div id="qrcode" class="flex justify-center items-center"></div>
+          </div>
+
+          <div class="mt-4 space-y-1">
+            <p class="text-xs text-slate-400">Point your phone camera at the code</p>
+            <p id="join-url-text" class="text-[11px] font-mono text-cyan/80 truncate px-2"></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-4 px-6 text-center text-xs text-slate-500 relative z-10">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        KDK College of Engineering, Great Nag Road, Nandanvan, Nagpur-440024
+      </div>
+      <div>
+        Organized with pride by <span class="text-slate-300 font-semibold">Rotaract Club of KDKCE</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/landing.js"></script>
+</body>
+</html>

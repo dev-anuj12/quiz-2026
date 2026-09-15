@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question Bank | KDK INDUCTION QUIZ 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative select-none">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-surface/90 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/">
+          <div class="bg-white/95 px-2 py-0.5 rounded-lg flex items-center shadow-md">
+            <img src="/assets/rotaract-logo.png" alt="Rotaract Logo" class="h-8 w-auto object-contain" />
+          </div>
+        </a>
+        <div class="h-6 w-px bg-white/20"></div>
+        <span class="text-sm font-heading font-bold text-white uppercase tracking-wider">Question Bank</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/admin.html" class="btn-outline text-xs py-1.5 px-3 flex items-center gap-1.5 hover:border-cyan text-slate-200">
+          ← Back to Control Center
+        </a>
+        <button id="open-add-modal-btn" class="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5">
+          <span>+ Add Question</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6 flex-1 relative z-10">
+    
+    <!-- Round Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-white/10 pb-3">
+      <button data-round="1" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold font-heading uppercase tracking-wider bg-cyan/20 border border-cyan text-cyan transition-all">
+        Round 1: Rapid Fire
+      </button>
+      <button data-round="2" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold font-heading uppercase tracking-wider bg-surface border border-white/10 text-slate-400 hover:text-white transition-all">
+        Round 2: Core Engineering
+      </button>
+      <button data-round="3" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold font-heading uppercase tracking-wider bg-surface border border-white/10 text-slate-400 hover:text-white transition-all">
+        Round 3: Grand Arena
+      </button>
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questions-list" class="space-y-4">
+      <!-- Populated via JavaScript or Empty State -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-questions-state" class="hidden cyber-card p-12 text-center max-w-md mx-auto space-y-3 bg-card/90">
+      <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 mx-auto flex items-center justify-center text-slate-400">
+        📝
+      </div>
+      <h3 class="text-xl font-bold font-heading text-white">No questions added yet.</h3>
+      <p class="text-xs text-slate-400">Add the official competition questions for this round using the button above.</p>
+    </div>
+
+  </main>
+
+  <!-- Question Modal (Create / Edit) -->
+  <div id="question-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="cyber-card max-w-xl w-full p-6 bg-card border border-white/10 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 id="modal-title" class="text-lg font-bold font-heading text-white">Add New Question</h3>
+        <button id="close-modal-btn" class="text-slate-400 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form id="question-form" class="space-y-4">
+        <input type="hidden" id="modal-question-id">
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Target Round</label>
+          <select id="modal-round-id" required class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Question Text</label>
+          <textarea id="modal-text" required rows="3" placeholder="Enter question text here..." class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Option A</label>
+            <input type="text" id="modal-opt-a" required placeholder="Option A text" class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Option B</label>
+            <input type="text" id="modal-opt-b" required placeholder="Option B text" class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Option C</label>
+            <input type="text" id="modal-opt-c" required placeholder="Option C text" class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Option D</label>
+            <input type="text" id="modal-opt-d" required placeholder="Option D text" class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Correct Option</label>
+            <select id="modal-correct-opt" required class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan">
+              <option value="A">Option A</option>
+              <option value="B">Option B</option>
+              <option value="C">Option C</option>
+              <option value="D">Option D</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-300 mb-1">Media URL (Optional)</label>
+            <input type="url" id="modal-media-url" placeholder="https://example.com/diagram.jpg" class="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" id="modal-cancel-btn" class="btn-outline text-xs py-2 px-4">Cancel</button>
+          <button type="submit" id="modal-submit-btn" class="btn-primary text-xs py-2 px-5">Save Question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-3 text-center text-xs text-slate-500">
+    Rotaract Club of KDKCE • Question Bank Management
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/question-bank.js"></script>
+</body>
+</html>

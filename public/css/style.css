@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+
+:root {
+  --bg-primary: #0c0e13;
+  --bg-secondary: #111319;
+  --bg-card: #191c21;
+  --cyber-cyan: #00e5ff;
+  --rotaract-magenta: #d91b5c;
+  --cyber-amber: #ffb703;
+  --cyber-emerald: #00f59b;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(0, 229, 255, 0.25);
+  --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: #f1f5f9;
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Cyber card container */
+.cyber-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-card:hover {
+  border-color: var(--border-highlight);
+}
+
+/* Cyber buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #00e5ff, #0088cc);
+  color: #0c0e13;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 229, 255, 0.35);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-magenta {
+  background: linear-gradient(135deg, #ff2a7a, #d91b5c);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 rgba(217, 27, 92, 0.35);
+  cursor: pointer;
+}
+
+.btn-magenta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 27, 92, 0.5);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: #94a3b8;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  padding: 0.65rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--cyber-cyan);
+  color: #ffffff;
+}
+
+/* Accessible focus states */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--cyber-cyan);
+  outline-offset: 2px;
+}
+
+/* Background grid effect */
+.cyber-grid-bg {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Radial ambient glow */
+.radial-glow {
+  background: radial-gradient(circle at 50% 30%, rgba(0, 229, 255, 0.07) 0%, rgba(217, 27, 92, 0.04) 50%, transparent 80%);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background-color: var(--bg-card);
+  color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--cyber-cyan);
+  padding: 12px 18px;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease forwards;
+}
+
+.toast.error {
+  border-left-color: var(--rotaract-magenta);
+}
+
+.toast.success {
+  border-left-color: var(--cyber-emerald);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}

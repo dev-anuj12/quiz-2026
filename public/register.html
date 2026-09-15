@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Registration | KDK INDUCTION QUIZ 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative selection:bg-cyan selection:text-black">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Top Header -->
+  <header class="w-full border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center">
+          <div class="bg-white/95 px-2 py-1 rounded-lg flex items-center shadow-md">
+            <img src="/assets/rotaract-logo.png" alt="Rotaract Club of KDKCE" class="h-8 md:h-10 w-auto object-contain" />
+          </div>
+        </a>
+      </div>
+      <div id="connection-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-950/60 text-emerald-400 border-emerald-800/80">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="connection-status-text">Connected</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Registration Form Card -->
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 my-4">
+    <div class="cyber-card max-w-lg w-full p-6 sm:p-8 bg-card/95 border border-white/10 relative">
+      
+      <!-- Top Cyber Tag -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span class="text-[11px] font-mono tracking-widest text-cyan uppercase font-bold">Arena Induction Phase</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-white">Team Registration</h2>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-magenta/10 border border-magenta/40 flex items-center justify-center text-magenta font-bold">
+          26
+        </div>
+      </div>
+
+      <form id="registration-form" class="space-y-5">
+        
+        <!-- Team Name -->
+        <div>
+          <label for="teamName" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            Team Name <span class="text-magenta">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="teamName" 
+            name="teamName" 
+            required 
+            minlength="2" 
+            maxlength="40"
+            placeholder="e.g. Cyber Knights, Mech Titans"
+            class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-cyan focus:ring-1 focus:ring-cyan text-sm transition-all"
+          />
+        </div>
+
+        <!-- Leader Name -->
+        <div>
+          <label for="leaderName" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            Team Leader Name <span class="text-magenta">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="leaderName" 
+            name="leaderName" 
+            required 
+            minlength="2" 
+            maxlength="40"
+            placeholder="e.g. Aditi Sharma, Rahul Verma"
+            class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-cyan focus:ring-1 focus:ring-cyan text-sm transition-all"
+          />
+        </div>
+
+        <!-- Avatar Selection Grid -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+            Select Team Avatar <span class="text-magenta">*</span>
+          </label>
+          <input type="hidden" id="selectedAvatar" name="avatar" value="⚡" required>
+          
+          <div id="avatar-grid" class="grid grid-cols-6 gap-2 sm:gap-2.5 p-3 rounded-lg bg-surface border border-white/5">
+            <!-- Populated via JavaScript with interactive cyber icons -->
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">This avatar will float inside the waiting lobby arena.</p>
+        </div>
+
+        <!-- Error Message Alert Box -->
+        <div id="form-error" class="hidden p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-medium"></div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="submit-btn"
+          class="w-full btn-primary py-3.5 text-base justify-center mt-2"
+        >
+          <span>Join Arena Lobby</span>
+        </button>
+
+        <p class="text-center text-xs text-slate-500 pt-2">
+          Already registered on this device? 
+          <a href="/lobby.html" class="text-cyan hover:underline font-medium">Return to Waiting Lobby</a>
+        </p>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-3 text-center text-xs text-slate-500">
+    Rotaract Club of KDKCE • KDK College of Engineering, Nagpur
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/register.js"></script>
+</body>
+</html>

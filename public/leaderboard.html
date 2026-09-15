@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Official Leaderboard & Podium | KDK INDUCTION QUIZ 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative select-none">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/">
+          <div class="bg-white/95 px-2.5 py-1 rounded-lg flex items-center shadow-md">
+            <img src="/assets/rotaract-logo.png" alt="Rotaract Club of KDKCE" class="h-8 md:h-10 w-auto object-contain" />
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/" class="btn-outline text-xs py-1.5 px-3">
+          Arena Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-8 flex-1 relative z-10">
+    
+    <!-- Title Banner -->
+    <div class="text-center space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/10 border border-amber/30 text-amber text-xs font-bold uppercase tracking-wider">
+        <span>🏆</span> Official Hall of Champions
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black font-heading tracking-tight text-white">
+        KDK INDUCTION QUIZ 2026
+      </h1>
+      <p class="text-sm text-slate-400">
+        Ranked strictly by authoritative database scores & tie-breaker response times
+      </p>
+    </div>
+
+    <!-- Empty state (also used while the host keeps rankings private) -->
+    <div id="no-scores-state" class="hidden cyber-card p-12 text-center max-w-md mx-auto space-y-3 bg-card/90">
+      <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 mx-auto flex items-center justify-center text-slate-400 text-2xl">
+        ⏳
+      </div>
+      <h3 id="leaderboard-empty-title" class="text-xl font-bold font-heading text-white">Leaderboard is hidden.</h3>
+      <p id="leaderboard-empty-copy" class="text-xs text-slate-400">The host will reveal live rankings when the time is right.</p>
+    </div>
+
+    <!-- Active Leaderboard Container -->
+    <div id="leaderboard-container" class="space-y-8">
+      
+      <!-- Top 3 Final Podium -->
+      <div id="podium-deck" class="grid grid-cols-3 gap-3 sm:gap-6 items-end max-w-2xl mx-auto pt-6 pb-2">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Ranked Leaderboard Table -->
+      <div class="cyber-card p-6 bg-card/95 border border-white/10 overflow-hidden shadow-2xl">
+        <h3 class="text-xs font-mono uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan"></span> Complete Tournament Standings
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="border-b border-white/10 text-slate-400 font-mono text-xs uppercase">
+              <tr>
+                <th class="py-3 px-4">Rank</th>
+                <th class="py-3 px-4">Team Name</th>
+                <th class="py-3 px-4 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-white/5 font-mono">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-4 px-6 text-center text-xs text-slate-500">
+    Presented by Rotaract Club of KDKCE • KDK College of Engineering, Nagpur
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/leaderboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | KDK INDUCTION QUIZ 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative selection:bg-cyan selection:text-black">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center">
+        <div class="bg-white/95 px-2 py-1 rounded-lg flex items-center shadow-md">
+          <img src="/assets/rotaract-logo.png" alt="Rotaract Logo" class="h-8 md:h-10 w-auto object-contain" />
+        </div>
+      </a>
+      <a href="/" class="text-xs text-slate-400 hover:text-cyan transition-colors">
+        ← Back to Arena
+      </a>
+    </div>
+  </header>
+
+  <!-- Login Card -->
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 my-6">
+    <div class="cyber-card max-w-md w-full p-6 sm:p-8 bg-card/95 border border-white/10 relative">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span class="text-[11px] font-mono tracking-widest text-magenta uppercase font-bold">Host Operations</span>
+          <h2 class="text-2xl font-extrabold font-heading text-white">Admin Authentication</h2>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center text-cyan">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        
+        <div>
+          <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            Admin Email Address
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            placeholder="admin@kdkce.edu"
+            class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-cyan focus:ring-1 focus:ring-cyan text-sm transition-all"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            Password
+          </label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            placeholder="••••••••••••"
+            class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-cyan focus:ring-1 focus:ring-cyan text-sm transition-all"
+          />
+        </div>
+
+        <div id="login-error" class="hidden p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-medium"></div>
+
+        <button 
+          type="submit" 
+          id="login-btn"
+          class="w-full btn-magenta py-3.5 text-base justify-center mt-2 flex items-center gap-2"
+        >
+          <span>Authenticate & Open Dashboard</span>
+        </button>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-3 text-center text-xs text-slate-500">
+    Rotaract Club of KDKCE • Host Command Center
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/admin-login.js"></script>
+</body>
+</html>

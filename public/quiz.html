@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Arena Quiz | KDK INDUCTION QUIZ 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arena: '#0c0e13',
+            surface: '#111319',
+            card: '#191c21',
+            cyan: '#00e5ff',
+            magenta: '#d91b5c',
+            amber: '#ffb703',
+            emerald: '#00f59b'
+          },
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative select-none">
+  <div class="radial-glow absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-3.5">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/">
+          <div class="bg-white/95 px-2 py-0.5 rounded-lg flex items-center shadow-md">
+            <img src="/assets/rotaract-logo.png" alt="Rotaract Logo" class="h-7 md:h-8 w-auto object-contain" />
+          </div>
+        </a>
+        <div class="h-5 w-px bg-white/20 hidden sm:block"></div>
+        <span id="round-badge" class="px-2.5 py-1 rounded bg-cyan/10 border border-cyan/30 text-cyan text-xs font-bold font-heading uppercase">
+          Round 1
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Team Identity Pill -->
+        <div id="team-info-pill" class="flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-white/10 text-xs">
+          <span id="player-avatar">⚡</span>
+          <span id="player-team-name" class="font-semibold text-slate-200 truncate max-w-[120px]">My Team</span>
+        </div>
+
+        <!-- Connection Badge -->
+        <div id="connection-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-950/60 text-emerald-400 border-emerald-800/80">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connection-status-text">Connected</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Countdown Timer Bar -->
+  <div class="w-full bg-surface border-b border-white/5 h-2 sm:h-2.5 relative overflow-hidden">
+    <div id="timer-progress-bar" class="h-full bg-gradient-to-r from-cyan via-amber to-magenta transition-all duration-200" style="width: 100%;"></div>
+  </div>
+
+  <!-- Main Live Arena Content -->
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10">
+    <div class="max-w-3xl w-full">
+
+      <!-- Waiting / Question Hidden State -->
+      <div id="quiz-standby" class="cyber-card p-8 text-center space-y-4 max-w-md mx-auto">
+        <div class="w-14 h-14 rounded-full bg-cyan/10 border border-cyan/30 mx-auto flex items-center justify-center text-cyan">
+          <svg class="w-7 h-7 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        </div>
+        <h3 id="standby-title" class="text-xl font-bold font-heading text-white">Stand By for Next Question</h3>
+        <p id="standby-desc" class="text-xs text-slate-400">The host is preparing the arena. Your answers will be enabled shortly.</p>
+      </div>
+
+      <!-- Active Question Container -->
+      <div id="quiz-active" class="hidden space-y-6">
+        
+        <!-- Question Header & Numerical Timer -->
+        <div class="cyber-card p-5 sm:p-6 bg-card/95 border border-cyan/30 relative">
+          <div class="flex items-center justify-between gap-4 mb-3">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan">
+              Live Question
+            </span>
+            <!-- Authoritative Countdown Display -->
+            <div class="flex items-center gap-2 bg-surface px-3 py-1 rounded-lg border border-white/10">
+              <span class="text-xs text-slate-400">Time:</span>
+              <span id="timer-number" class="text-lg font-black font-mono text-cyan">30s</span>
+            </div>
+          </div>
+
+          <!-- Question Text -->
+          <h2 id="question-text" class="text-lg sm:text-2xl font-bold text-white leading-snug">
+            Question text loading...
+          </h2>
+
+          <!-- Optional Media Container -->
+          <div id="media-container" class="hidden mt-4 rounded-lg overflow-hidden border border-white/10 max-h-60 bg-black flex items-center justify-center">
+            <img id="question-media-img" src="" alt="Question Media" class="max-h-60 w-auto object-contain" />
+          </div>
+        </div>
+
+        <!-- 4 Options Grid (A, B, C, D) -->
+        <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          
+          <button type="button" data-option="A" class="option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group">
+            <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center font-heading font-black text-cyan group-hover:border-cyan">
+              A
+            </div>
+            <span id="opt-text-A" class="text-sm sm:text-base font-medium text-slate-200 flex-1">Option A</span>
+          </button>
+
+          <button type="button" data-option="B" class="option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group">
+            <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center font-heading font-black text-cyan group-hover:border-cyan">
+              B
+            </div>
+            <span id="opt-text-B" class="text-sm sm:text-base font-medium text-slate-200 flex-1">Option B</span>
+          </button>
+
+          <button type="button" data-option="C" class="option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group">
+            <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center font-heading font-black text-cyan group-hover:border-cyan">
+              C
+            </div>
+            <span id="opt-text-C" class="text-sm sm:text-base font-medium text-slate-200 flex-1">Option C</span>
+          </button>
+
+          <button type="button" data-option="D" class="option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group">
+            <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center font-heading font-black text-cyan group-hover:border-cyan">
+              D
+            </div>
+            <span id="opt-text-D" class="text-sm sm:text-base font-medium text-slate-200 flex-1">Option D</span>
+          </button>
+
+        </div>
+
+        <!-- Answer State Bar: READY -> SUBMITTED -> LOCKED -->
+        <div class="cyber-card p-4 bg-surface/90 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span id="status-pill" class="px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-slate-400">
+              READY
+            </span>
+            <span id="status-explanation" class="text-xs text-slate-400">Tap any option above to submit instantly.</span>
+          </div>
+
+          <button 
+            id="submit-answer-btn" 
+            type="button" 
+            disabled 
+            class="btn-primary w-full sm:w-auto px-6 py-2.5 text-sm opacity-50 cursor-not-allowed hidden"
+          >
+            Auto-Submit Active
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="w-full border-t border-white/5 bg-surface/50 py-3 px-6 text-center text-xs text-slate-500">
+    KDK Induction Quiz 2026 • Server-Authoritative Live Arena
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/quiz.js"></script>
+</body>
+</html>
