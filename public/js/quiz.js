@@ -53,6 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusPill = document.getElementById('status-pill');
   const statusExplanation = document.getElementById('status-explanation');
   const submitBtn = document.getElementById('submit-answer-btn');
+  const quizStatsBanner = document.getElementById('quiz-stats-banner');
+  const quizTotalSubmissions = document.getElementById('quiz-total-submissions');
 
   // Local Question State
   let currentQuestionId = null;
@@ -277,10 +279,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentQuestionId = q.id;
       selectedOption = null;
 
-      // Reset options styling
+      if (quizStatsBanner) quizStatsBanner.classList.add('hidden');
+
+      // Reset options styling & hide stats
+      ['A', 'B', 'C', 'D'].forEach(opt => {
+        const statEl = document.getElementById(`opt-stat-${opt}`);
+        const barWrap = document.getElementById(`opt-bar-wrap-${opt}`);
+        const barEl = document.getElementById(`opt-bar-${opt}`);
+        if (statEl) { statEl.classList.add('hidden'); statEl.textContent = '0%'; }
+        if (barWrap) barWrap.classList.add('hidden');
+        if (barEl) { barEl.style.width = '0%'; barEl.className = 'h-full bg-cyan rounded-full transition-all duration-500'; }
+      });
+
       optionBtns.forEach(btn => {
         btn.classList.remove('pointer-events-none');
-        btn.className = 'option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group';
+        btn.className = 'option-btn cyber-card p-4 sm:p-5 flex flex-col justify-between text-left border border-white/10 hover:border-cyan/50 transition-all bg-card group relative overflow-hidden';
       });
 
       // Check if already answered in this browser session
@@ -289,7 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedOption = savedAnswer;
         const targetBtn = document.querySelector(`.option-btn[data-option="${savedAnswer}"]`);
         if (targetBtn) {
-          targetBtn.className = 'option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border border-emerald-500 bg-emerald-950/40 text-white';
+          targetBtn.className = 'option-btn cyber-card p-4 sm:p-5 flex flex-col justify-between text-left border border-emerald-500 bg-emerald-950/40 text-white relative overflow-hidden';
         }
         setAnswerState('SUBMITTED');
       } else {
@@ -320,19 +333,62 @@ document.addEventListener('DOMContentLoaded', async () => {
       setAnswerState('LOCKED');
     }
 
-    // Reveal correct option styling if host revealed
-    if (state.answerRevealed && q.correctOption) {
+    // Reveal correct option and stats breakdown if host revealed
+    if (state.answerRevealed) {
+      if (quizStatsBanner && state.answerStats) {
+        quizStatsBanner.classList.remove('hidden');
+        if (quizTotalSubmissions) {
+          const total = state.answerStats.totalSubmissions || 0;
+          quizTotalSubmissions.textContent = `${total} ${total === 1 ? 'Team' : 'Teams'} Answered`;
+        }
+      }
+
+      const pcts = state.answerStats?.percentages || {};
+      const counts = state.answerStats?.breakdown || {};
+
       optionBtns.forEach(btn => {
         const opt = btn.getAttribute('data-option');
-        if (opt === q.correctOption) {
-          btn.className = 'option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border-2 border-emerald-400 bg-emerald-950/80 text-white shadow-[0_0_20px_rgba(0,245,155,0.5)]';
-        } else if (opt === selectedOption && selectedOption !== q.correctOption) {
-          btn.className = 'option-btn cyber-card p-4 sm:p-5 flex items-center gap-4 text-left border-2 border-rose-500 bg-rose-950/80 text-white';
+        const statEl = document.getElementById(`opt-stat-${opt}`);
+        const barWrap = document.getElementById(`opt-bar-wrap-${opt}`);
+        const barEl = document.getElementById(`opt-bar-${opt}`);
+        const pct = Number(pcts[opt] || 0);
+        const count = Number(counts[opt] || 0);
+
+        if (statEl) {
+          statEl.textContent = `${pct}% (${count} ${count === 1 ? 'team' : 'teams'})`;
+          statEl.classList.remove('hidden');
+        }
+        if (barWrap) barWrap.classList.remove('hidden');
+        if (barEl) {
+          barEl.style.width = `${pct}%`;
+        }
+
+        if (q.correctOption && opt === q.correctOption) {
+          btn.className = 'option-btn cyber-card p-4 sm:p-5 flex flex-col justify-between text-left border-2 border-emerald-400 bg-emerald-950/80 text-white shadow-[0_0_20px_rgba(0,245,155,0.5)] relative overflow-hidden';
+          if (statEl) statEl.className = 'text-xs font-mono font-bold text-emerald-400';
+          if (barEl) barEl.className = 'h-full bg-emerald-400 rounded-full transition-all duration-500';
+        } else if (selectedOption && opt === selectedOption && opt !== q.correctOption) {
+          btn.className = 'option-btn cyber-card p-4 sm:p-5 flex flex-col justify-between text-left border-2 border-rose-500 bg-rose-950/80 text-white relative overflow-hidden';
+          if (statEl) statEl.className = 'text-xs font-mono font-bold text-rose-400';
+          if (barEl) barEl.className = 'h-full bg-rose-500 rounded-full transition-all duration-500';
+        } else {
+          btn.className = 'option-btn cyber-card p-4 sm:p-5 flex flex-col justify-between text-left border border-white/10 opacity-60 bg-card relative overflow-hidden';
+          if (statEl) statEl.className = 'text-xs font-mono font-bold text-slate-400';
+          if (barEl) barEl.className = 'h-full bg-slate-600 rounded-full transition-all duration-500';
         }
       });
-      if (statusExplanation) {
+
+      if (statusExplanation && q.correctOption) {
         statusExplanation.textContent = `Correct answer is Option ${q.correctOption}`;
       }
+    } else {
+      if (quizStatsBanner) quizStatsBanner.classList.add('hidden');
+      ['A', 'B', 'C', 'D'].forEach(opt => {
+        const statEl = document.getElementById(`opt-stat-${opt}`);
+        const barWrap = document.getElementById(`opt-bar-wrap-${opt}`);
+        if (statEl) statEl.classList.add('hidden');
+        if (barWrap) barWrap.classList.add('hidden');
+      });
     }
   }
 

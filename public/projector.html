@@ -81,12 +81,17 @@
     <!-- Stage 2: Active Question Screen -->
     <div id="proj-active-question" class="hidden w-full max-w-6xl space-y-8">
       
-      <!-- Top Row: Question Text + Giant 20s Digital Timer -->
+      <!-- Top Row: Question Text + Giant 30s Digital Timer + Answer Count Badge -->
       <div class="flex flex-col lg:flex-row items-center gap-8 bg-card/90 p-8 rounded-2xl border border-cyan/30 shadow-2xl">
         <div class="flex-1 space-y-3">
-          <span class="text-xs font-mono font-bold uppercase tracking-widest text-cyan block">
-            LIVE QUESTION ON STAGE
-          </span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-cyan block">
+              LIVE QUESTION ON STAGE
+            </span>
+            <div id="proj-response-summary" class="hidden px-3 py-1 rounded-full bg-cyan/10 border border-cyan/30 text-cyan text-xs font-mono font-bold">
+              📊 <span id="proj-total-submissions">0</span> Teams Answered
+            </div>
+          </div>
           <h2 id="proj-question-text" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
             Question text loading...
           </h2>
@@ -101,36 +106,68 @@
 
       <!-- 4 High Contrast Options Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div id="proj-opt-A" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex items-center gap-5 transition-all">
-          <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
-            A
+        <div id="proj-opt-A" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all relative overflow-hidden">
+          <div class="flex items-center gap-5 w-full">
+            <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
+              A
+            </div>
+            <span id="proj-text-A" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option A</span>
+            <div id="proj-stat-box-A" class="hidden text-right flex-shrink-0">
+              <span id="proj-pct-A" class="text-2xl font-black font-mono text-cyan block">0%</span>
+              <span id="proj-cnt-A" class="text-xs font-mono text-slate-400">0 teams</span>
+            </div>
           </div>
-          <span id="proj-text-A" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option A</span>
-          <span id="proj-pct-A" class="hidden text-lg sm:text-xl font-black font-mono text-cyan">0%</span>
+          <div id="proj-bar-wrap-A" class="hidden mt-4 w-full h-2.5 bg-surface/80 rounded-full overflow-hidden">
+            <div id="proj-bar-A" class="h-full bg-cyan rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
         </div>
 
-        <div id="proj-opt-B" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex items-center gap-5 transition-all">
-          <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
-            B
+        <div id="proj-opt-B" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all relative overflow-hidden">
+          <div class="flex items-center gap-5 w-full">
+            <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
+              B
+            </div>
+            <span id="proj-text-B" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option B</span>
+            <div id="proj-stat-box-B" class="hidden text-right flex-shrink-0">
+              <span id="proj-pct-B" class="text-2xl font-black font-mono text-cyan block">0%</span>
+              <span id="proj-cnt-B" class="text-xs font-mono text-slate-400">0 teams</span>
+            </div>
           </div>
-          <span id="proj-text-B" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option B</span>
-          <span id="proj-pct-B" class="hidden text-lg sm:text-xl font-black font-mono text-cyan">0%</span>
+          <div id="proj-bar-wrap-B" class="hidden mt-4 w-full h-2.5 bg-surface/80 rounded-full overflow-hidden">
+            <div id="proj-bar-B" class="h-full bg-cyan rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
         </div>
 
-        <div id="proj-opt-C" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex items-center gap-5 transition-all">
-          <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
-            C
+        <div id="proj-opt-C" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all relative overflow-hidden">
+          <div class="flex items-center gap-5 w-full">
+            <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
+              C
+            </div>
+            <span id="proj-text-C" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option C</span>
+            <div id="proj-stat-box-C" class="hidden text-right flex-shrink-0">
+              <span id="proj-pct-C" class="text-2xl font-black font-mono text-cyan block">0%</span>
+              <span id="proj-cnt-C" class="text-xs font-mono text-slate-400">0 teams</span>
+            </div>
           </div>
-          <span id="proj-text-C" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option C</span>
-          <span id="proj-pct-C" class="hidden text-lg sm:text-xl font-black font-mono text-cyan">0%</span>
+          <div id="proj-bar-wrap-C" class="hidden mt-4 w-full h-2.5 bg-surface/80 rounded-full overflow-hidden">
+            <div id="proj-bar-C" class="h-full bg-cyan rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
         </div>
 
-        <div id="proj-opt-D" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex items-center gap-5 transition-all">
-          <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
-            D
+        <div id="proj-opt-D" class="proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all relative overflow-hidden">
+          <div class="flex items-center gap-5 w-full">
+            <div class="w-14 h-14 rounded-xl bg-surface border border-white/20 flex items-center justify-center font-heading font-black text-2xl text-cyan flex-shrink-0">
+              D
+            </div>
+            <span id="proj-text-D" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option D</span>
+            <div id="proj-stat-box-D" class="hidden text-right flex-shrink-0">
+              <span id="proj-pct-D" class="text-2xl font-black font-mono text-cyan block">0%</span>
+              <span id="proj-cnt-D" class="text-xs font-mono text-slate-400">0 teams</span>
+            </div>
           </div>
-          <span id="proj-text-D" class="text-xl sm:text-2xl font-bold text-slate-100 flex-1">Option D</span>
-          <span id="proj-pct-D" class="hidden text-lg sm:text-xl font-black font-mono text-cyan">0%</span>
+          <div id="proj-bar-wrap-D" class="hidden mt-4 w-full h-2.5 bg-surface/80 rounded-full overflow-hidden">
+            <div id="proj-bar-D" class="h-full bg-cyan rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
         </div>
       </div>
 

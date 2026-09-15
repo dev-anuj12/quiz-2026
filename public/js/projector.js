@@ -205,10 +205,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (projTextC) projTextC.textContent = q.optionC;
     if (projTextD) projTextD.textContent = q.optionD;
 
-    // Reset option card styles and hide percentages until answer reveal.
-    [projPctA, projPctB, projPctC, projPctD].forEach(el => {
-      if (el) { el.textContent = '0%'; el.classList.add('hidden'); }
-    });
+    // Reset option card styles and hide stats until answer reveal.
+    const projResponseSummary = document.getElementById('proj-response-summary');
+    const projTotalSubmissions = document.getElementById('proj-total-submissions');
 
     const optCards = [
       { el: projOptA, key: 'A' },
@@ -217,23 +216,53 @@ document.addEventListener('DOMContentLoaded', async () => {
       { el: projOptD, key: 'D' }
     ];
 
-    optCards.forEach(({ el, key }) => {
-      el.className = 'proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex items-center gap-5 transition-all';
-      if (state.answerRevealed && q.correctOption === key) {
-        el.className = 'proj-opt-card p-6 rounded-xl bg-emerald-950/80 border-2 border-emerald-400 text-white flex items-center gap-5 transition-all shadow-[0_0_30px_rgba(0,245,155,0.6)] scale-[1.02]';
+    if (state.answerRevealed && state.answerStats) {
+      if (projResponseSummary && projTotalSubmissions) {
+        const total = state.answerStats.totalSubmissions || 0;
+        projTotalSubmissions.textContent = total;
+        projResponseSummary.classList.remove('hidden');
       }
-    });
 
+      const pcts = state.answerStats.percentages || {};
+      const counts = state.answerStats.breakdown || {};
 
-    if (state.answerRevealed && state.answerStats?.percentages) {
-      const pctEls = { A: projPctA, B: projPctB, C: projPctC, D: projPctD };
-      for (const key of Object.keys(pctEls)) {
-        const el = pctEls[key];
-        if (el) {
-          el.textContent = `${Number(state.answerStats.percentages[key] || 0)}%`;
-          el.classList.remove('hidden');
+      optCards.forEach(({ el, key }) => {
+        const pctEl = document.getElementById(`proj-pct-${key}`);
+        const cntEl = document.getElementById(`proj-cnt-${key}`);
+        const statBox = document.getElementById(`proj-stat-box-${key}`);
+        const barWrap = document.getElementById(`proj-bar-wrap-${key}`);
+        const barEl = document.getElementById(`proj-bar-${key}`);
+        const pct = Number(pcts[key] || 0);
+        const count = Number(counts[key] || 0);
+
+        if (pctEl) pctEl.textContent = `${pct}%`;
+        if (cntEl) cntEl.textContent = `${count} ${count === 1 ? 'team' : 'teams'}`;
+        if (statBox) statBox.classList.remove('hidden');
+        if (barWrap) barWrap.classList.remove('hidden');
+        if (barEl) barEl.style.width = `${pct}%`;
+
+        if (q.correctOption === key) {
+          el.className = 'proj-opt-card p-6 rounded-xl bg-emerald-950/80 border-2 border-emerald-400 text-white flex flex-col justify-between transition-all shadow-[0_0_30px_rgba(0,245,155,0.6)] scale-[1.02] relative overflow-hidden';
+          if (pctEl) pctEl.className = 'text-2xl font-black font-mono text-emerald-400 block';
+          if (barEl) barEl.className = 'h-full bg-emerald-400 rounded-full transition-all duration-700';
+        } else {
+          el.className = 'proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all opacity-75 relative overflow-hidden';
+          if (pctEl) pctEl.className = 'text-2xl font-black font-mono text-slate-300 block';
+          if (barEl) barEl.className = 'h-full bg-cyan rounded-full transition-all duration-700';
         }
-      }
+      });
+    } else {
+      if (projResponseSummary) projResponseSummary.classList.add('hidden');
+
+      optCards.forEach(({ el, key }) => {
+        el.className = 'proj-opt-card p-6 rounded-xl bg-card border-2 border-white/10 flex flex-col justify-between transition-all relative overflow-hidden';
+        const statBox = document.getElementById(`proj-stat-box-${key}`);
+        const barWrap = document.getElementById(`proj-bar-wrap-${key}`);
+        const barEl = document.getElementById(`proj-bar-${key}`);
+        if (statBox) statBox.classList.add('hidden');
+        if (barWrap) barWrap.classList.add('hidden');
+        if (barEl) barEl.style.width = '0%';
+      });
     }
 
     // Timer Sync

@@ -58,13 +58,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     answerDistribution.classList.remove('hidden');
-    if (distributionTotal) distributionTotal.textContent = `${stats.totalSubmissions || 0} responses`;
+    const total = stats.totalSubmissions || 0;
+    if (distributionTotal) {
+      distributionTotal.textContent = `${total} ${total === 1 ? 'response' : 'responses'}`;
+    }
+
+    const correctOpt = state.currentQuestion?.correctOption || state.currentQuestion?.adminCorrectOption;
+
     for (const option of ['A', 'B', 'C', 'D']) {
       const pct = Number(stats.percentages?.[option] || 0);
+      const count = Number(stats.breakdown?.[option] || 0);
       const label = document.getElementById(`percent-${option}`);
       const bar = document.getElementById(`bar-${option}`);
-      if (label) label.textContent = `${pct}%`;
-      if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+
+      if (label) {
+        label.textContent = `${pct}% (${count} ${count === 1 ? 'team' : 'teams'})`;
+        label.className = (correctOpt === option) ? 'font-bold text-emerald-400' : 'text-slate-300';
+      }
+      if (bar) {
+        bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+        bar.className = (correctOpt === option) ? 'h-full bg-emerald-400 rounded-full transition-all' : 'h-full bg-cyan rounded-full transition-all';
+      }
     }
   }
 
@@ -227,6 +241,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (adminOptC) adminOptC.textContent = 'C: —';
       if (adminOptD) adminOptD.textContent = 'D: —';
     }
+
+    // Render answer distribution if revealed
+    renderAnswerDistribution(state);
 
     // Timer Sync
     syncTimer(state.timerStartedAt, state.timerDuration, state.timerPaused);
