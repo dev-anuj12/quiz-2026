@@ -121,11 +121,21 @@ class GameService {
 
   async recordAuditLog(adminId, action, metadata = {}) {
     try {
+      let parsedMetadata = {};
+      if (typeof metadata === 'object' && metadata !== null) {
+        parsedMetadata = metadata;
+      } else if (typeof metadata === 'string') {
+        try {
+          parsedMetadata = JSON.parse(metadata);
+        } catch (_) {
+          parsedMetadata = { raw: metadata };
+        }
+      }
       await prisma.auditLog.create({
         data: {
           adminId: adminId || null,
           action,
-          metadata: typeof metadata === 'string' ? metadata : JSON.stringify(metadata)
+          metadata: parsedMetadata
         }
       });
     } catch (err) {

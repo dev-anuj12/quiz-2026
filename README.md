@@ -177,56 +177,29 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌐 Deploying to Production
+## 🌐 Deploying to Production (Vercel + Supabase)
 
-### Option A: Separate Frontend (Vercel) & Backend (Railway / Render)
+The entire full-stack application (frontend, API routes, database ORM, and real-time polling fallback) is engineered to deploy seamlessly on **Vercel** with a **Supabase PostgreSQL** database.
 
-The Vercel frontend includes an `/api/*` proxy. Set the following Vercel
-environment variables before deploying it so registration and admin login reach
-the persistent backend instead of an empty static route:
-
-- `BACKEND_URL`: the public Railway/Render backend origin (for example, `https://kdk-quiz-backend.up.railway.app`)
-- `SOCKET_URL`: the same backend origin, unless Socket.IO is hosted elsewhere
-- `PUBLIC_JOIN_URL`: the Vercel frontend registration URL
-
-The backend must set `ALLOWED_ORIGINS` to the Vercel frontend origin and must
-have `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` set.
-
-#### 1. Backend (Persistent Node.js + Socket.IO) on Railway or Render:
-1. Create a PostgreSQL database on Railway or Render.
-2. Deploy the repository as a Node.js Web Service:
-   - Build Command: `npm install && npx prisma generate`
-   - Start Command: `npm start`
-3. Configure environment variables in the host dashboard:
-   - `DATABASE_URL`: Your PostgreSQL connection string
-   - `JWT_SECRET`: A secure random 32+ character key
-   - `ADMIN_EMAIL`: Host admin email
-   - `ADMIN_PASSWORD`: Strong host admin password
-   - `ALLOWED_ORIGINS`: `https://your-frontend.vercel.app`
-   - `PUBLIC_JOIN_URL`: `https://your-frontend.vercel.app/register.html`
-   - `NODE_ENV`: `production`
-   - `PORT`: `3000` (or host assigned `$PORT`)
-4. Run migrations on the production database:
+### 1. Database Setup (Supabase)
+1. Create a project on [Supabase](https://supabase.com).
+2. Copy your PostgreSQL connection string from **Project Settings > Database > Connection String (URI / Prisma)**.
+3. Push your Prisma schema & seed questions:
    ```bash
-   npx prisma migrate deploy
+   npx prisma db push
    node prisma/seed.js
    ```
 
-#### 2. Frontend on Vercel:
-1. Connect your repository to Vercel.
-2. Root directory: set to root.
-3. Vercel automatically detects `vercel.json` and serves the static `/public` assets.
-4. Set Environment Variables in Vercel:
-   - `BACKEND_URL`: `https://your-backend.up.railway.app`
-   - `SOCKET_URL`: `https://your-backend.up.railway.app`
-   - `PUBLIC_JOIN_URL`: `https://your-frontend.vercel.app/register.html`
-
-### Option B: Monolithic Persistent Node.js (Docker / Single VM)
-The repository includes a ready-to-use production `Dockerfile`:
-```bash
-docker build -t kdk-quiz-2026 .
-docker run -p 3000:3000 --env-file .env kdk-quiz-2026
-```
+### 2. Full-Stack Deployment on Vercel
+1. Import your GitHub repository (`dev-anuj12/quiz-2026`) into [Vercel](https://vercel.com).
+2. Set the following Environment Variables in your Vercel Project Settings:
+   - `DATABASE_URL`: Your Supabase connection string (Pooler or direct URI)
+   - `DIRECT_URL`: Your Supabase direct connection string
+   - `JWT_SECRET`: A secure random secret key
+   - `ADMIN_EMAIL`: `admin@kdkce.edu` (or your host admin email)
+   - `ADMIN_PASSWORD`: Your secure admin password
+   - `NODE_ENV`: `production`
+3. Click **Deploy**. Vercel will automatically build and host the complete quiz platform with zero additional server configuration.
 
 ---
 

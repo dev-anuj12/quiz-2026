@@ -93,6 +93,7 @@ app.get('/api/config', (req, res) => {
     publicJoinUrl: env.PUBLIC_JOIN_URL || `${origin}/register.html`,
     backendUrl: env.BACKEND_URL || origin,
     socketUrl: env.SOCKET_URL || origin,
+    realtime: 'polling',
     environment: env.NODE_ENV
   });
 });
