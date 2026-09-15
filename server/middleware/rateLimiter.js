@@ -18,6 +18,12 @@ const apiLimiter = rateLimit({
   max: 500, // Limit each IP to 500 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  // Every screen polls the public game state. At an event, many teams can
+  // share one college Wi-Fi IP, so counting these reads causes the limiter to
+  // reject real answer and host-control requests after a few minutes.
+  skip: (req) => req.method === 'GET' && (
+    req.path === '/game/state' || req.path === '/config'
+  ),
   message: {
     success: false,
     error: 'Too many requests. Please slow down.'

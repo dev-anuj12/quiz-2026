@@ -48,8 +48,10 @@ class GameService {
     return elapsed > (state.timerDuration * 1000 + 1000);
   }
 
-  async getHydratedState() {
-    const state = await this.getOrCreateState();
+  async getHydratedState(state = null) {
+    // Mutation handlers already have the freshly updated row. Reusing it avoids
+    // an extra database read on every host button press.
+    state = state || await this.getOrCreateState();
     let currentQuestion = null;
 
     if (state.currentQuestionId) {
@@ -65,14 +67,16 @@ class GameService {
     // This keeps live results hidden while teams are still answering.
     let answerStats = null;
     if (state.answerRevealed && state.currentQuestionId) {
-      const totalSubmissions = await prisma.answer.count({
-        where: { questionId: state.currentQuestionId }
-      });
-      const optionCounts = await prisma.answer.groupBy({
-        by: ['selectedOption'],
-        where: { questionId: state.currentQuestionId },
-        _count: { selectedOption: true }
-      });
+      const [totalSubmissions, optionCounts] = await Promise.all([
+        prisma.answer.count({
+          where: { questionId: state.currentQuestionId }
+        }),
+        prisma.answer.groupBy({
+          by: ['selectedOption'],
+          where: { questionId: state.currentQuestionId },
+          _count: { selectedOption: true }
+        })
+      ]);
 
       const breakdown = { A: 0, B: 0, C: 0, D: 0 };
       for (const item of optionCounts) {
@@ -149,11 +153,14 @@ class GameService {
       data: updates
     });
 
-    if (actionName) {
-      await this.recordAuditLog(adminId, actionName, updates);
-    }
+    // The UI state and audit entry do not depend on each other, so do both
+    // after the update instead of making the host wait for serial queries.
+    const [hydratedState] = await Promise.all([
+      this.getHydratedState(state),
+      actionName ? this.recordAuditLog(adminId, actionName, updates) : Promise.resolve()
+    ]);
 
-    return await this.getHydratedState();
+    return hydratedState;
   }
 
   async startGame(adminId) {
@@ -257,7 +264,7 @@ class GameService {
     }, adminId, `ROUND_CHANGED_TO_${roundNumber}`);
   }
 
-  async setQuestion(questionId, show = false, adminId) {
+  async setQuestion(questionId, show = true, adminId) {
     const question = await prisma.question.findUnique({
       where: { id: questionId },
       include: { round: true }
@@ -276,22 +283,13 @@ class GameService {
       timerPaused: false
     };
 
-    // Activating a question starts its own authoritative countdown. Keeping a
-    // question hidden remains a preparation-only action and does not start it.
-    if (show) {
-      updates.status = 'ACTIVE';
-      updates.timerStartedAt = new Date();
-    }
-
     return await this.updateState(updates, adminId, `QUESTION_SET_${question.id}`);
   }
 
   async setQuestionVisibility(visible, adminId) {
-    const updates = { questionVisible: Boolean(visible) };
-    if (visible) {
-      updates.status = 'ACTIVE';
-      updates.timerStartedAt = new Date();
-    }
+    const updates = {
+      questionVisible: Boolean(visible)
+    };
     return await this.updateState(
       updates,
       adminId,

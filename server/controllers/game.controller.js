@@ -141,11 +141,17 @@ exports.navigateQuestion = async (req, res) => {
     const direction = req.body.direction; // 'next' or 'prev'
     const currentState = await gameService.getOrCreateState();
 
+    if (!['next', 'prev'].includes(direction)) {
+      return res.status(400).json({ success: false, error: 'Direction must be next or prev' });
+    }
+
     const questions = await prisma.question.findMany({
       where: {
         round: { number: currentState.currentRound }
       },
-      orderBy: { createdAt: 'asc' }
+      // createdAt may be identical for imported questions; the ID tie-breaker
+      // keeps Previous/Next predictable in that case.
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }]
     });
 
     if (questions.length === 0) {

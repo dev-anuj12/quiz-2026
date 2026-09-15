@@ -77,8 +77,11 @@ class QuizSocket {
     this.updateStatus('Polling', 'amber');
 
     let lastStateJson = null;
+    let isFetching = false;
 
     const poll = async () => {
+      if (isFetching) return;
+      isFetching = true;
       try {
         const token = localStorage.getItem('kdk_admin_token');
         const headers = {};
@@ -107,11 +110,13 @@ class QuizSocket {
         this.updateStatus('Live', 'emerald');
       } catch (_) {
         this.updateStatus('Offline', 'magenta');
+      } finally {
+        isFetching = false;
       }
     };
 
     poll();   // immediate first fetch
-    this._pollInterval = setInterval(poll, 2500);
+    this._pollInterval = setInterval(poll, 1500);
   }
 
   _fire(event, data) {

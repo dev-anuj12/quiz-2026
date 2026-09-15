@@ -6,6 +6,7 @@ const env = require('./config/env');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const logger = require('./utils/logger');
 
+const fs = require('fs');
 const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const teamsRoutes = require('./routes/teams.routes');
@@ -116,18 +117,34 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve static frontend files from public directory
-app.use(express.static(path.join(__dirname, '../public')));
+const publicDir = [
+  path.join(process.cwd(), 'public'),
+  path.join(__dirname, '../public'),
+  path.join(__dirname, 'public')
+].find(p => fs.existsSync(p)) || path.join(__dirname, '../public');
 
-// Frontend convenience routes
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public', 'index.html')));
-app.get('/register', (req, res) => res.sendFile(path.join(__dirname, '../public', 'register.html')));
-app.get('/lobby', (req, res) => res.sendFile(path.join(__dirname, '../public', 'lobby.html')));
-app.get('/quiz', (req, res) => res.sendFile(path.join(__dirname, '../public', 'quiz.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public', 'admin.html')));
-app.get('/admin-login', (req, res) => res.sendFile(path.join(__dirname, '../public', 'admin-login.html')));
-app.get('/projector', (req, res) => res.sendFile(path.join(__dirname, '../public', 'projector.html')));
-app.get('/leaderboard', (req, res) => res.sendFile(path.join(__dirname, '../public', 'leaderboard.html')));
-app.get('/question-bank', (req, res) => res.sendFile(path.join(__dirname, '../public', 'question-bank.html')));
+app.use(express.static(publicDir));
+
+// Frontend convenience and exact .html routes
+const pages = [
+  'index',
+  'register',
+  'lobby',
+  'quiz',
+  'admin',
+  'admin-login',
+  'projector',
+  'leaderboard',
+  'question-bank'
+];
+
+pages.forEach(page => {
+  const filePath = path.join(publicDir, `${page}.html`);
+  app.get(`/${page}`, (req, res) => res.sendFile(filePath));
+  app.get(`/${page}.html`, (req, res) => res.sendFile(filePath));
+});
+
+app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
 // Catch-all 404 for API routes
 app.use('/api/*', (req, res) => {

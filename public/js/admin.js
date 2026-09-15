@@ -91,6 +91,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok || !data.success) {
         throw new Error(data.error || `Operation failed (HTTP ${res.status})`);
       }
+      // Instantly render returned state without waiting for next polling cycle
+      if (data.state) {
+        renderState(data.state);
+      }
       return data;
     } catch (err) {
       window.AppConfig.showToast(err.message, 'error');
@@ -127,9 +131,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     adminQuestionSelect.addEventListener('change', async (e) => {
       const qId = e.target.value;
       if (qId) {
-        if (currentState?.leaderboardVisible) {
-          await apiCall('/api/game/leaderboard', 'POST', { visible: false });
-        }
+        // Activating a question hides the leaderboard server-side and starts
+        // its timer, so this remains one responsive request.
         await apiCall('/api/game/question', 'POST', { questionId: qId, show: true });
         window.AppConfig.showToast('Question activated and visible to arena', 'success');
       }
@@ -361,73 +364,86 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Safe Click Listener Helper
+  function addClick(id, handler) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', async (e) => {
+        el.style.opacity = '0.6';
+        el.style.pointerEvents = 'none';
+        try {
+          await handler(e);
+        } finally {
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+        }
+      });
+    }
+  }
+
   // Action Button Listeners
-  document.getElementById('btn-game-start').addEventListener('click', () => apiCall('/api/game/start'));
-  document.getElementById('btn-game-pause').addEventListener('click', () => apiCall('/api/game/pause'));
-  document.getElementById('btn-game-resume').addEventListener('click', () => apiCall('/api/game/resume'));
-  document.getElementById('btn-game-end').addEventListener('click', () => {
-    if (confirm('End the quiz and trigger final rankings?')) apiCall('/api/game/end');
+  addClick('btn-game-start', () => apiCall('/api/game/start'));
+  addClick('btn-game-pause', () => apiCall('/api/game/pause'));
+  addClick('btn-game-resume', () => apiCall('/api/game/resume'));
+  addClick('btn-game-end', () => {
+    if (confirm('End the quiz and trigger final rankings?')) return apiCall('/api/game/end');
   });
-  document.getElementById('btn-game-reset').addEventListener('click', () => {
-    if (confirm('Reset the arena back to initial lobby status?')) apiCall('/api/game/reset');
+  addClick('btn-game-reset', () => {
+    if (confirm('Reset the arena back to initial lobby status?')) return apiCall('/api/game/reset');
   });
 
   // Round Selectors
-  document.getElementById('btn-round-1').addEventListener('click', () => apiCall('/api/game/round', 'POST', { roundNumber: 1 }));
-  document.getElementById('btn-round-2').addEventListener('click', () => apiCall('/api/game/round', 'POST', { roundNumber: 2 }));
-  document.getElementById('btn-round-3').addEventListener('click', () => apiCall('/api/game/round', 'POST', { roundNumber: 3 }));
+  addClick('btn-round-1', () => apiCall('/api/game/round', 'POST', { roundNumber: 1 }));
+  addClick('btn-round-2', () => apiCall('/api/game/round', 'POST', { roundNumber: 2 }));
+  addClick('btn-round-3', () => apiCall('/api/game/round', 'POST', { roundNumber: 3 }));
 
   // Question Navigation & Controls
   async function navigateQuestion(direction) {
-    if (currentState?.leaderboardVisible) {
-      await apiCall('/api/game/leaderboard', 'POST', { visible: false });
-    }
-    const result = await apiCall('/api/game/question-nav', 'POST', { direction });
-    // Supports the already-running local server as well; after a restart the
-    // backend supplies timerStartedAt and this fallback is skipped.
-    if (!result.state?.timerStartedAt) {
-      await apiCall('/api/game/timer', 'POST', { action: 'start', duration: 30 });
-    }
+    // Navigation publishes the new question and begins a fresh 30-second
+    // server-authoritative timer in the same request.
+    await apiCall('/api/game/question-nav', 'POST', { direction });
   }
-  document.getElementById('btn-prev-question').addEventListener('click', () => navigateQuestion('prev'));
-  document.getElementById('btn-next-question').addEventListener('click', () => navigateQuestion('next'));
-  document.getElementById('btn-toggle-q-visibility').addEventListener('click', () => {
+  addClick('btn-prev-question', () => navigateQuestion('prev'));
+  addClick('btn-next-question', () => navigateQuestion('next'));
+  addClick('btn-toggle-q-visibility', () => {
     const isVisible = currentState?.questionVisible;
-    apiCall('/api/game/question-visibility', 'POST', { visible: !isVisible });
+    return apiCall('/api/game/question-visibility', 'POST', { visible: !isVisible });
   });
 
   // Timer Controls
-  document.getElementById('btn-timer-start').addEventListener('click', () => apiCall('/api/game/timer', 'POST', { action: 'start', duration: 30 }));
-  document.getElementById('btn-timer-pause').addEventListener('click', () => apiCall('/api/game/timer', 'POST', { action: 'pause' }));
-  document.getElementById('btn-timer-reset').addEventListener('click', () => apiCall('/api/game/timer', 'POST', { action: 'reset', duration: 30 }));
+  addClick('btn-timer-start', () => apiCall('/api/game/timer', 'POST', { action: 'start', duration: 30 }));
+  addClick('btn-timer-pause', () => apiCall('/api/game/timer', 'POST', { action: 'pause' }));
+  addClick('btn-timer-reset', () => apiCall('/api/game/timer', 'POST', { action: 'reset', duration: 30 }));
 
   // Answer Controls
-  document.getElementById('btn-lock-answers').addEventListener('click', () => apiCall('/api/game/answer-lock', 'POST', { locked: true }));
-  document.getElementById('btn-unlock-answers').addEventListener('click', () => apiCall('/api/game/answer-lock', 'POST', { locked: false }));
-  document.getElementById('btn-reveal-answer').addEventListener('click', () => apiCall('/api/game/reveal', 'POST', { reveal: true }));
+  addClick('btn-lock-answers', () => apiCall('/api/game/answer-lock', 'POST', { locked: true }));
+  addClick('btn-unlock-answers', () => apiCall('/api/game/answer-lock', 'POST', { locked: false }));
+  addClick('btn-reveal-answer', () => apiCall('/api/game/reveal', 'POST', { reveal: true }));
 
   // Leaderboard & Projector Controls
-  document.getElementById('btn-leaderboard-show').addEventListener('click', () => apiCall('/api/game/leaderboard', 'POST', { visible: true }));
-  document.getElementById('btn-leaderboard-hide').addEventListener('click', () => apiCall('/api/game/leaderboard', 'POST', { visible: false }));
-  document.getElementById('btn-projector-toggle').addEventListener('click', () => {
+  addClick('btn-leaderboard-show', () => apiCall('/api/game/leaderboard', 'POST', { visible: true }));
+  addClick('btn-leaderboard-hide', () => apiCall('/api/game/leaderboard', 'POST', { visible: false }));
+  addClick('btn-projector-toggle', () => {
     const isEnabled = currentState?.projectorEnabled;
-    apiCall('/api/game/projector', 'POST', { enabled: !isEnabled });
+    return apiCall('/api/game/projector', 'POST', { enabled: !isEnabled });
   });
 
   // Registration Open/Close
-  document.getElementById('btn-reg-open').addEventListener('click', () => {
-    apiCall('/api/game/reset'); // Returns to LOBBY
+  addClick('btn-reg-open', async () => {
+    await apiCall('/api/game/reset'); // Returns to LOBBY
     window.AppConfig.showToast('Registration opened', 'success');
   });
-  document.getElementById('btn-reg-close').addEventListener('click', () => {
-    apiCall('/api/game/start'); // Moves to ACTIVE, closing registration
+  addClick('btn-reg-close', async () => {
+    await apiCall('/api/game/start'); // Moves to ACTIVE, closing registration
     window.AppConfig.showToast('Registration closed (Arena Active)', 'info');
   });
 
   // Logout
-  logoutBtn.addEventListener('click', async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    localStorage.removeItem('kdk_admin_token');
-    window.location.href = '/admin-login.html';
-  });
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      localStorage.removeItem('kdk_admin_token');
+      window.location.href = '/admin-login.html';
+    });
+  }
 });
