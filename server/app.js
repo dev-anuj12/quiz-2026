@@ -83,6 +83,11 @@ app.use(cookieParser());
 
 // URL normalization middleware for Vercel / serverless deployments
 app.use((req, res, next) => {
+  const matched = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-now-route-matches'];
+  if (matched && (req.url === '/api/index.js' || req.url === '/api' || req.url === '/index.js' || req.url === '/' || req.url.startsWith('/api/[...all]'))) {
+    req.url = matched;
+  }
+
   if (req.url && !req.url.startsWith('/api') && !req.url.startsWith('/socket.io') && !req.url.startsWith('/css') && !req.url.startsWith('/js') && !req.url.startsWith('/assets')) {
     const apiPrefixes = ['/teams', '/config', '/health', '/auth', '/questions', '/game', '/answers', '/leaderboard'];
     const matchingPrefix = apiPrefixes.find(p => req.url === p || req.url.startsWith(p + '/') || req.url.startsWith(p + '?'));

@@ -10,9 +10,7 @@
     { "source": "/play", "destination": "/register.html" },
     { "source": "/play.html", "destination": "/register.html" },
     { "source": "/team", "destination": "/register.html" },
-    { "source": "/team.html", "destination": "/register.html" },
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/socket.io/(.*)", "destination": "/api/index.js" }
+    { "source": "/team.html", "destination": "/register.html" }
   ]
 }
 
