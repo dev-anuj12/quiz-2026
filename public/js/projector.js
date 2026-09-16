@@ -33,10 +33,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const projPctD = document.getElementById('proj-pct-D');
   const projLeaderboardView = document.getElementById('proj-leaderboard-view');
   const projPodiumDeck = document.getElementById('proj-podium-deck');
-  const projLeaderboardTbody = document.getElementById('proj-leaderboard-tbody');
-
   let timerInterval = null;
   let currentState = null;
+
+  // Render Projector QR Code
+  const projQrContainer = document.getElementById('proj-qrcode');
+  const projJoinUrlLabel = document.getElementById('proj-join-url-label');
+  const joinUrl = window.AppConfig.publicJoinUrl || (window.location.origin + '/register.html');
+
+  if (projJoinUrlLabel) {
+    projJoinUrlLabel.textContent = joinUrl;
+  }
+
+  if (projQrContainer && typeof QRCode !== 'undefined') {
+    try {
+      projQrContainer.innerHTML = '';
+      new QRCode(projQrContainer, {
+        text: joinUrl,
+        width: 170,
+        height: 170,
+        colorDark: '#0c0e13',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch (e) {
+      console.warn('Projector QR generation error:', e);
+    }
+  }
 
   function syncTimer(startedAt, duration, isPaused) {
     if (timerInterval) clearInterval(timerInterval);

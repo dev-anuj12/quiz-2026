@@ -22,6 +22,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (myTeamPill) myTeamPill.classList.add('flex');
   }
 
+  // QR Code Rendering for Lobby Empty State & Modal
+  const joinUrl = window.AppConfig.publicJoinUrl || (window.location.origin + '/register.html');
+  const lobbyQrContainer = document.getElementById('lobby-qrcode');
+  const lobbyJoinUrlLabel = document.getElementById('lobby-join-url-label');
+  const modalQrContainer = document.getElementById('modal-qrcode');
+  const modalJoinUrlLabel = document.getElementById('modal-join-url-label');
+  const qrModal = document.getElementById('qr-modal');
+  const btnShowQrModal = document.getElementById('btn-show-qr-modal');
+  const btnCloseQrModal = document.getElementById('btn-close-qr-modal');
+
+  if (lobbyJoinUrlLabel) lobbyJoinUrlLabel.textContent = joinUrl;
+  if (modalJoinUrlLabel) modalJoinUrlLabel.textContent = joinUrl;
+
+  if (lobbyQrContainer && typeof QRCode !== 'undefined') {
+    try {
+      new QRCode(lobbyQrContainer, {
+        text: joinUrl,
+        width: 140,
+        height: 140,
+        colorDark: '#0c0e13',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch (_) {}
+  }
+
+  let modalQrRendered = false;
+  function renderModalQr() {
+    if (!modalQrRendered && modalQrContainer && typeof QRCode !== 'undefined') {
+      try {
+        new QRCode(modalQrContainer, {
+          text: joinUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#0c0e13',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        modalQrRendered = true;
+      } catch (_) {}
+    }
+  }
+
+  if (btnShowQrModal && qrModal) {
+    btnShowQrModal.addEventListener('click', () => {
+      renderModalQr();
+      qrModal.classList.remove('hidden');
+    });
+  }
+
+  if (btnCloseQrModal && qrModal) {
+    btnCloseQrModal.addEventListener('click', () => {
+      qrModal.classList.add('hidden');
+    });
+  }
+
+  if (qrModal) {
+    qrModal.addEventListener('click', (e) => {
+      if (e.target === qrModal) qrModal.classList.add('hidden');
+    });
+  }
+
   // Resize Handling
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);

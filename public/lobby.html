@@ -28,6 +28,7 @@
     }
   </script>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/qrcode.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body class="bg-arena text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between relative select-none">
@@ -50,8 +51,15 @@
       </div>
     </div>
 
-    <!-- Active Team Indicator & Connection Status -->
+    <!-- Active Team Indicator, QR Modal Toggle & Connection Status -->
     <div class="flex items-center gap-3">
+      <button id="btn-show-qr-modal" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface/80 backdrop-blur-md border border-white/10 text-xs font-semibold text-slate-300 hover:text-cyan hover:border-cyan/40 transition-all">
+        <svg class="w-3.5 h-3.5 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+        </svg>
+        <span>Join QR</span>
+      </button>
+
       <div id="my-team-pill" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-surface/80 backdrop-blur-md border border-cyan/40 text-xs font-semibold text-cyan shadow-[0_0_12px_rgba(0,229,255,0.2)]">
         <span id="my-team-avatar">⚡</span>
         <span id="my-team-name">My Team</span>
@@ -66,18 +74,40 @@
 
   <!-- Centered Empty State Overlay (Visible only when team count is 0) -->
   <div id="empty-state-overlay" class="relative z-10 flex-1 flex flex-col items-center justify-center pointer-events-none p-6 text-center">
-    <div class="max-w-md p-8 rounded-2xl bg-surface/40 backdrop-blur-sm border border-white/5 space-y-3">
+    <div class="max-w-md p-6 sm:p-8 rounded-2xl bg-surface/80 backdrop-blur-md border border-white/10 space-y-4 pointer-events-auto shadow-2xl">
       <div class="w-12 h-12 rounded-full bg-cyan/10 border border-cyan/30 mx-auto flex items-center justify-center text-cyan">
         <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       </div>
-      <h3 class="text-xl sm:text-2xl font-bold font-heading text-white">
-        Waiting for teams to join…
-      </h3>
-      <p class="text-xs sm:text-sm text-slate-400">
-        Scan the QR to enter the arena.
-      </p>
+      <div>
+        <h3 class="text-xl font-bold font-heading text-white">
+          Waiting for teams to join…
+        </h3>
+        <p class="text-xs text-slate-400 mt-0.5">
+          Scan the QR code below to enter the arena.
+        </p>
+      </div>
+
+      <!-- In-Lobby QR Code -->
+      <div class="inline-block bg-white p-2.5 rounded-xl shadow-inner mx-auto">
+        <div id="lobby-qrcode" class="flex justify-center items-center"></div>
+      </div>
+      <p id="lobby-join-url-label" class="text-[11px] font-mono text-cyan truncate"></p>
+    </div>
+  </div>
+
+  <!-- QR Modal Overlay -->
+  <div id="qr-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="cyber-card p-6 bg-card border border-cyan/40 max-w-xs w-full text-center space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-mono font-bold text-cyan uppercase">Direct Join QR</span>
+        <button id="btn-close-qr-modal" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <div class="bg-white p-3 rounded-xl inline-block mx-auto">
+        <div id="modal-qrcode" class="flex justify-center items-center"></div>
+      </div>
+      <p id="modal-join-url-label" class="text-[11px] font-mono text-cyan truncate px-2"></p>
     </div>
   </div>
 

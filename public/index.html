@@ -30,9 +30,9 @@
   </script>
   <!-- Global CSS -->
   <link rel="stylesheet" href="/css/style.css">
-  <!-- QR Code Library CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- Socket.IO Client CDN -->
+  <!-- Local & Offline QRCode Library -->
+  <script src="/js/qrcode.min.js"></script>
+  <!-- Socket.IO Client CDN / Fallback -->
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body class="bg-arena text-slate-100 min-h-screen flex flex-col justify-between cyber-grid-bg relative selection:bg-cyan selection:text-black">
@@ -98,6 +98,20 @@
           </div>
         </div>
 
+        <!-- Already Registered Team Banner (Visible if registered on this device) -->
+        <div id="already-registered-banner" class="hidden p-3.5 rounded-lg bg-cyan/10 border border-cyan/40 max-w-md items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span id="registered-team-avatar" class="text-xl">⚡</span>
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-cyan font-bold block">Registered Team on this Device</span>
+              <span id="registered-team-name" class="text-sm font-bold text-white">Team Name</span>
+            </div>
+          </div>
+          <a href="/lobby.html" class="btn-primary text-xs py-1.5 px-3">
+            <span>Enter Lobby ▶</span>
+          </a>
+        </div>
+
         <!-- Action Buttons -->
         <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
           <a id="join-arena-btn" href="/register.html" class="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
@@ -128,12 +142,20 @@
 
           <!-- Dynamic QR Container -->
           <div class="bg-white p-4 rounded-xl inline-block mx-auto shadow-inner">
-            <div id="qrcode" class="flex justify-center items-center"></div>
+            <div id="qrcode" class="flex justify-center items-center min-h-[180px] min-w-[180px]"></div>
           </div>
 
-          <div class="mt-4 space-y-1">
+          <div class="mt-4 space-y-2">
             <p class="text-xs text-slate-400">Point your phone camera at the code</p>
-            <p id="join-url-text" class="text-[11px] font-mono text-cyan/80 truncate px-2"></p>
+            <div class="flex items-center justify-center gap-1.5 bg-surface/80 rounded-lg p-1.5 border border-white/10">
+              <a id="join-url-link" href="/register.html" target="_blank" class="text-[11px] font-mono text-cyan hover:underline truncate max-w-[200px] px-1"></a>
+              <button id="copy-join-url-btn" type="button" class="p-1 px-2 text-[10px] font-bold rounded bg-cyan/20 text-cyan hover:bg-cyan/30 transition-all" title="Copy Join URL">
+                Copy
+              </button>
+            </div>
+            <div id="lan-hint" class="hidden text-[10px] text-emerald-400 font-mono">
+              ✓ Mobile LAN Wi-Fi access enabled
+            </div>
           </div>
         </div>
       </div>

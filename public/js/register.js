@@ -32,6 +32,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorBox = document.getElementById('form-error');
   const submitBtn = document.getElementById('submit-btn');
 
+  // Check if team credentials already exist on this device
+  const savedTeamId = localStorage.getItem('kdk_team_id');
+  const savedTeamName = localStorage.getItem('kdk_team_name');
+  const savedTeamAvatar = localStorage.getItem('kdk_team_avatar');
+
+  const registeredBox = document.getElementById('already-registered-box');
+  const registeredAvatarBadge = document.getElementById('registered-avatar-badge');
+  const registeredNameDisplay = document.getElementById('registered-team-name-display');
+  const reRegisterBtn = document.getElementById('btn-re-register');
+
+  if (savedTeamId && savedTeamName && registeredBox) {
+    if (registeredAvatarBadge) registeredAvatarBadge.textContent = savedTeamAvatar || '⚡';
+    if (registeredNameDisplay) registeredNameDisplay.textContent = savedTeamName;
+    registeredBox.classList.remove('hidden');
+
+    if (reRegisterBtn) {
+      reRegisterBtn.addEventListener('click', () => {
+        localStorage.removeItem('kdk_team_id');
+        localStorage.removeItem('kdk_team_name');
+        localStorage.removeItem('kdk_team_avatar');
+        localStorage.removeItem('kdk_session_token');
+        registeredBox.classList.add('hidden');
+        document.getElementById('teamName')?.focus();
+        window.AppConfig.showToast('Previous team credentials cleared. Enter your new team details.', 'info');
+      });
+    }
+  }
+
   // Populate Avatars
   avatars.forEach((item, index) => {
     const btn = document.createElement('button');

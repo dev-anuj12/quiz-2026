@@ -1,17 +1,18 @@
 {
   "version": 2,
-  "regions": ["bom1"],
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": "public/**"
-      }
-    }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/server.js" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/participant", "destination": "/register.html" },
+    { "source": "/participant.html", "destination": "/register.html" },
+    { "source": "/join", "destination": "/register.html" },
+    { "source": "/join.html", "destination": "/register.html" },
+    { "source": "/play", "destination": "/register.html" },
+    { "source": "/play.html", "destination": "/register.html" },
+    { "source": "/team", "destination": "/register.html" },
+    { "source": "/team.html", "destination": "/register.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/socket.io/(.*)", "destination": "/api/index.js" }
   ]
 }
 

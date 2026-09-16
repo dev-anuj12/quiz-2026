@@ -28,6 +28,7 @@
     }
   </script>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/qrcode.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body class="bg-arena text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between cyber-grid-bg relative select-none">
@@ -65,17 +66,25 @@
     
     <!-- Stage 1: Waiting / Standby -->
     <div id="proj-standby" class="text-center space-y-6 max-w-2xl">
-      <div class="w-20 h-20 rounded-full bg-cyan/10 border-2 border-cyan/40 mx-auto flex items-center justify-center text-cyan shadow-[0_0_30px_rgba(0,229,255,0.3)]">
-        <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-16 h-16 rounded-full bg-cyan/10 border-2 border-cyan/40 mx-auto flex items-center justify-center text-cyan shadow-[0_0_30px_rgba(0,229,255,0.3)]">
+        <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       </div>
-      <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight text-white">
-        KDK INDUCTION QUIZ 2026
-      </h1>
-      <p id="proj-standby-subtext" class="text-lg text-slate-400 font-normal">
-        Waiting for the host to broadcast the question to the arena...
-      </p>
+      <div>
+        <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight text-white">
+          KDK INDUCTION QUIZ 2026
+        </h1>
+        <p id="proj-standby-subtext" class="text-sm text-slate-400 font-normal mt-1">
+          Scan the QR code on stage with your mobile phone to register your team.
+        </p>
+      </div>
+
+      <!-- Projector Join QR Deck -->
+      <div id="proj-qr-wrapper" class="inline-block bg-white p-3.5 rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.25)] border border-cyan/40">
+        <div id="proj-qrcode" class="flex justify-center items-center"></div>
+      </div>
+      <p id="proj-join-url-label" class="text-xs font-mono text-cyan/90 block"></p>
     </div>
 
     <!-- Stage 2: Active Question Screen -->
