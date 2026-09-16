@@ -118,7 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       this.id = team.id;
       this.name = team.name;
       this.avatar = team.avatar || '⚡';
-      this.baseRadius = width < 640 ? 38 : 46;
+      const totalCount = Math.max(1, bubbles.size + 1);
+      const densityScale = totalCount > 16 ? Math.max(0.62, Math.sqrt(16 / totalCount)) : 1.0;
+      this.baseRadius = (width < 640 ? 36 : 44) * densityScale;
       this.radius = this.baseRadius;
       
       // Spawn at random edge/corner

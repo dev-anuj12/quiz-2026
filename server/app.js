@@ -129,10 +129,16 @@ const configHandler = (req, res) => {
   const port = env.PORT || 3000;
   const lanJoinUrl = lanIp ? `http://${lanIp}:${port}/register.html` : null;
   
-  // If PUBLIC_JOIN_URL is not set or points to localhost, prefer the reachable LAN IP for mobile QR scanning
-  let effectiveJoinUrl = env.PUBLIC_JOIN_URL;
-  if (!effectiveJoinUrl || effectiveJoinUrl.includes('localhost') || effectiveJoinUrl.includes('127.0.0.1')) {
-    effectiveJoinUrl = lanJoinUrl || `${origin}/register.html`;
+  // In local development, use LAN IP if available; in production, use current request origin
+  let effectiveJoinUrl = `${origin}/register.html`;
+  if (isLocalhost && lanJoinUrl) {
+    effectiveJoinUrl = lanJoinUrl;
+  } else if (env.PUBLIC_JOIN_URL && !env.PUBLIC_JOIN_URL.includes('localhost') && !env.PUBLIC_JOIN_URL.includes('127.0.0.1')) {
+    // Only use env.PUBLIC_JOIN_URL if it matches the current deployment domain
+    const configuredHost = env.PUBLIC_JOIN_URL.replace(/^https?:\/\//, '').split('/')[0];
+    if (configuredHost === host) {
+      effectiveJoinUrl = env.PUBLIC_JOIN_URL;
+    }
   }
 
   return res.json({
@@ -140,8 +146,8 @@ const configHandler = (req, res) => {
     lanJoinUrl: lanJoinUrl,
     originJoinUrl: `${origin}/register.html`,
     lanIp: lanIp,
-    backendUrl: env.BACKEND_URL || origin,
-    socketUrl: env.SOCKET_URL || origin,
+    backendUrl: origin,
+    socketUrl: origin,
     realtime: 'polling',
     environment: env.NODE_ENV
   });

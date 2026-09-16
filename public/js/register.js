@@ -23,8 +23,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     { icon: '🔬', label: 'Quantum' },
     { icon: '💻', label: 'Matrix' },
     { icon: '🎯', label: 'Target' },
-    { icon: '🌌', label: 'Cosmos' }
+    { icon: '🌌', label: 'Cosmos' },
+    { icon: '🔥', label: 'Blaze' },
+    { icon: '🐺', label: 'Wolf' },
+    { icon: '🦁', label: 'Lion' },
+    { icon: '🐯', label: 'Tiger' },
+    { icon: '🦈', label: 'Apex' },
+    { icon: '⚔️', label: 'Gladiator' },
+    { icon: '👑', label: 'Crown' },
+    { icon: '💎', label: 'Diamond' },
+    { icon: '🪐', label: 'Planet' },
+    { icon: '☄️', label: 'Comet' },
+    { icon: '🔮', label: 'Oracle' },
+    { icon: '🕹️', label: 'Arcade' },
+    { icon: '🏎️', label: 'Turbo' },
+    { icon: '⚓', label: 'Anchor' },
+    { icon: '🧠', label: 'Synapse' },
+    { icon: '🌋', label: 'Magma' },
+    { icon: '🌪️', label: 'Vortex' },
+    { icon: '🌊', label: 'Tsunami' },
+    { icon: '🦾', label: 'Bionic' },
+    { icon: '👾', label: 'Invader' },
+    { icon: '🧬', label: 'Helix' },
+    { icon: '🏹', label: 'Archer' },
+    { icon: '🏆', label: 'Champion' },
+    { icon: '🔋', label: 'Energy' },
+    { icon: '🌠', label: 'Nova' },
+    { icon: '🛸', label: 'UFO' },
+    { icon: '⚡️', label: 'Spark' },
+    { icon: '🌟', label: 'Star' },
+    { icon: '🎖️', label: 'Valor' },
+    { icon: '💥', label: 'Impact' }
   ];
+
 
   const grid = document.getElementById('avatar-grid');
   const avatarInput = document.getElementById('selectedAvatar');
