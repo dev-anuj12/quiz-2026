@@ -81,11 +81,23 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
+// URL normalization middleware for Vercel / serverless deployments
+app.use((req, res, next) => {
+  if (req.url && !req.url.startsWith('/api') && !req.url.startsWith('/socket.io') && !req.url.startsWith('/css') && !req.url.startsWith('/js') && !req.url.startsWith('/assets')) {
+    const apiPrefixes = ['/teams', '/config', '/health', '/auth', '/questions', '/game', '/answers', '/leaderboard'];
+    const matchingPrefix = apiPrefixes.find(p => req.url === p || req.url.startsWith(p + '/') || req.url.startsWith(p + '?'));
+    if (matchingPrefix) {
+      req.url = '/api' + req.url;
+    }
+  }
+  next();
+});
+
 // General rate limiter on API endpoints
 app.use('/api/', apiLimiter);
 
 // Public dynamic client configuration (NEVER expose secrets or passwords)
-app.get('/api/config', (req, res) => {
+const configHandler = (req, res) => {
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const host = req.headers['x-forwarded-host'] || req.get('host') || `localhost:${env.PORT || 3000}`;
   const origin = `${protocol}://${host}`;
@@ -128,24 +140,39 @@ app.get('/api/config', (req, res) => {
     realtime: 'polling',
     environment: env.NODE_ENV
   });
-});
+};
 
-// API Routes
+app.get('/api/config', configHandler);
+app.get('/config', configHandler);
+
+// API Routes (Mounted on /api/... and direct prefixes for universal compatibility)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/teams', teamsRoutes);
+app.use('/teams', teamsRoutes);
+
 app.use('/api/questions', questionsRoutes);
+app.use('/questions', questionsRoutes);
+
 app.use('/api/game', gameRoutes);
+app.use('/game', gameRoutes);
+
 app.use('/api/answers', answersRoutes);
+app.use('/answers', answersRoutes);
+
 app.use('/api/leaderboard', leaderboardRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+const healthHandler = (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     event: 'KDK INDUCTION QUIZ 2026'
   });
-});
+};
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
 
 // Serve static frontend files from public directory
 const publicDir = [
